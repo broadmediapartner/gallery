@@ -22,8 +22,10 @@ function bmp_gallery_enqueue_scripts() {
     wp_enqueue_script('isotope', plugins_url('/assets/plugins/isotope/isotope.pkgd.min.js', __FILE__), array('jquery'), BMP_GALLERY_VERSION, true);
 
     wp_enqueue_script('bmp-gallery', plugins_url('/assets/js/gallery.js', __FILE__), array('jquery', 'isotope', 'imagesloaded'), BMP_GALLERY_VERSION, true);
-
     wp_enqueue_style('bmp-gallery', plugins_url('/assets/css/gallery.css', __FILE__), null, BMP_GALLERY_VERSION);
+
+    wp_enqueue_script('tos', plugins_url('/assets/plugins/tos/js/jquery.tosrus.min.all.js', __FILE__), array('jquery'), BMP_GALLERY_VERSION, true);
+    wp_enqueue_style('tos', plugins_url('/assets/plugins/tos/css/jquery.tosrus.all.css', __FILE__), null, BMP_GALLERY_VERSION);
 
 }
 
@@ -86,17 +88,47 @@ add_shortcode('bmp_gallery', 'bmp_gallery_shortcode');
 
 
 function bmp_gallery_bool($value){
-    return ($value == 'yes' || $value == '1');
+    return ($value == 'yes' || $value == 'on' || $value == '1');
+}
+
+
+function bmp_gallery_hex2rgb($hex, $alpha = '0.4') {
+    $hex = str_replace("#", "", $hex);
+
+    if(strlen($hex) == 3) {
+        $r = hexdec(substr($hex,0,1).substr($hex,0,1));
+        $g = hexdec(substr($hex,1,1).substr($hex,1,1));
+        $b = hexdec(substr($hex,2,1).substr($hex,2,1));
+    } else {
+        $r = hexdec(substr($hex,0,2));
+        $g = hexdec(substr($hex,2,2));
+        $b = hexdec(substr($hex,4,2));
+    }
+    $rgb = array($r, $g, $b);
+    return 'rgba(' . join(', ', $rgb) . ', ' . $alpha .')';
 }
 
 
 function bmp_gallery_shortcode($atts, $content = null) {
 
     $atts = shortcode_atts(array(
-       'cat' => '',
-       'menu_pos' => 'center',
-       'limit' => 20,
-       'gap' => 0,
+        'cat'           => '',
+        'menu_show'     => '1',
+        'menu_pos'      => 'center',
+        'lightbox'      => 'yes',
+        'limit'         => 20,
+        'border_size'   => 5,
+        'border_color'  => '#fff',
+        'overlay_color' => '#fff',
+        'menu_color'    => '#fff',
+        'menu_bg'       => '#000',
+        'menu_gap'      => 4,
+        'hover_data'    => 'yes',
+        'bg'            => '#eee',
+        'desc_color'    => '#000',
+        'gap'           => 10,
+        'style'         => 'normal',
+        'size'          => 'medium'
     ), $atts, 'bmp_gallery');
 
     $output = '';
@@ -108,83 +140,122 @@ function bmp_gallery_shortcode($atts, $content = null) {
         'post_mime_type' => 'image/jpeg,image/gif,image/jpg,image/png'
     );
 
+    $categories = array();
 
+    $atts['cat'] = array_map('sanitize_title', explode(',', $atts['cat']));
 
-    $classes = array();
+    foreach($atts['cat'] as $category){
+
+        if($term = get_term_by('slug', $category, 'attachment_category')){
+            $categories[$term->term_id] = $term;
+        }
+
+    }
+
+    if(!empty($categories)){
+        $args['tax_query'] = array(
+            array(
+                'taxonomy' => 'attachment_category',
+                'field'    => 'term_id',
+                'terms'    => array_keys($categories)
+            )
+        );
+    }
+
+    $atts['menu_gap'] = min($atts['menu_gap'], 100);
+
     $classes[] = 'bmp-gallery';
     $classes[] = 'menu-' . $atts['menu_pos'];
+    $classes[] = bmp_gallery_bool($atts['menu_show']) ? 'menu-show' : '';
+    $classes[] = 'size-' . $atts['size'];
+    $classes[] = 'style-' . $atts['style'];
+
+    $attributes = array();
+    $attributes['class'] = join(' ', $classes);
+    $attributes['id'] = 'bmp-' . substr(md5(mt_rand(0, PHP_INT_MAX)), 0, 6);
+    $attributes['data-gap'] = intval($atts['gap']);
+    $attributes['data-border-color'] = $atts['border_color'];
+    $attributes['data-lightbox'] = bmp_gallery_bool($atts['lightbox']) ? 'yes' : 'no';
+    $attributes['data-desc-color'] = $atts['desc_color'];
+    $attributes['data-menu-color'] = $atts['menu_color'];
+    $attributes['data-menu-bg'] = $atts['menu_bg'];
+    $attributes['data-menu-gap'] = $atts['menu_gap'];
+    $attributes['data-bg'] = $atts['bg'];
+    $attributes['data-border-size'] = $atts['border_size'];
+    $attributes['data-overlay-color'] = bmp_gallery_hex2rgb($atts['overlay_color']);
+
+    $thumb_size = 'medium';
+
+    if($atts['size'] == 'large' || ($atts['style'] == 'squared' && in_array($atts['size'], array('medium', 'large')))){
+        $thumb_size = 'large';
+    }
 
 
+    foreach($attributes as $attribute => $value){
+        $attributes[$attribute] = $attribute . '="' . $value . '"';
+    }
 
     $query = new WP_Query($args);
 
-    $output .= '<div class="' . join(' ', $classes) . '" data-gap="' . intval($atts['gap']) . '">';
-
-    $cats = explode(',', $atts['cat']);
-
+    $output .= '<div ' . join(' ', $attributes) . '>';
     $output .= '<ul class="bmp-gallery-filters">';
     $output .= '<li>';
     $output .= '<a data-filter="" href="#">' . __('All', 'bmp_gallery') . '</a>';
     $output .= '</li>';
 
-    foreach($cats as $cat){
+    foreach($categories as $category){
 
-        if(!empty($cat)){
+        if(!empty($category)){
             $output .= '<li>';
-            $output .= '<a data-filter="' . $cat . '" href="#">' . $cat . '</a>';
+            $output .= '<a data-filter="' . $category->slug . '" href="#">' . $category->name . '</a>';
             $output .= '</li>';
         }
 
     }
 
     $output .= '</ul>';
-
-
 
     $output .= '<div class="bmp-gallery-list-wrapper">';
     $output .= '<ul class="bmp-gallery-list">';
-    $output .= '';
 
-    if ($query->have_posts()) {
+    foreach($query->posts as $post){
 
-        while ($query->have_posts()) {
+        $category_terms = wp_get_post_terms($post->ID, 'attachment_category');
 
-            $query->the_post();
+        $classes = array();
+        $classes[] = 'bmp-gallery-item';
 
-            $categories = wp_get_post_terms(get_the_ID(), 'attachment_category');
-
-            $classes = array();
-            $classes[] = 'bmp-gallery-item';
-
-            foreach($categories as $category){
-                $classes[] = 'category-' . $category->slug;
-            }
-
-
-            $image_source = wp_get_attachment_image_src(get_the_ID(), 'full');
-            $image_thumbnail = wp_get_attachment_image(get_the_ID(), 'medium');
-
-            $output .= '<li';
-            $output .= ' data-source="' . $image_source[0] . '"';
-            $output .= ' class="' . join(' ', $classes) . '">';
-
-            $output .= $image_thumbnail;
-            //$output .= '<img src="'.$image_thumbnail . '" />';
-
-
-            $output .= '</li>';
-
+        foreach($category_terms as $category_term){
+            $classes[] = 'category-' . $category_term->slug;
         }
 
-    }
+        $image_source = wp_get_attachment_image_src($post->ID, 'full');
 
-    $query->reset_postdata();
+        $output .= '<li data-source="' . $image_source[0] . '" class="' . join(' ', $classes) . '">';
+
+        $output .= '<a class="image-wrap" href="' . $image_source[0] . '">';
+        $output .= '<figure>';
+
+        $output .= wp_get_attachment_image($post->ID, $thumb_size);
+
+        $output .= '<div class="image-overlay">';
+        
+        if(bmp_gallery_bool($atts['hover_data'])){
+            $output .= '<h3>' . $post->post_title . '</h3>';
+            $output .= '<h4>' . $post->post_content . '</h4>';
+        }
+
+        $output .= '</div>';
+
+        $output .= '</figure>';
+        $output .= '</a>';
+        $output .= '</li>';
+
+    }
 
     $output .= '</ul>';
     $output .= '</div>';
     $output .= '</div>';
-
-    $output .= '';
 
     return $output;
 

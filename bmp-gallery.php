@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: BMP Gallery
+ * Plugin Name: Go Gallery
  * Plugin URI:  
- * Text Domain: bmp_gallery
+ * Text Domain: go_gallery
  * Description: Blah Blah Blah
  * Version:     1.0.0
  * Author:      BroadMediaPartner
@@ -11,21 +11,22 @@
  */
 
 
-define('BMP_GALLERY_VERSION', '1.0' . time());
+define('GO_GALLERY_VERSION', '1.0');
 
 
-add_action('wp_enqueue_scripts', 'bmp_gallery_enqueue_scripts');
+add_action('wp_enqueue_scripts', 'go_gallery_enqueue_scripts');
 
-function bmp_gallery_enqueue_scripts() {
+function go_gallery_enqueue_scripts() {
 
-    wp_enqueue_script('imagesloaded', plugins_url('/assets/plugins/imagesloaded/imagesloaded.pkgd.min.js', __FILE__), array('jquery'), BMP_GALLERY_VERSION, true);
-    wp_enqueue_script('isotope', plugins_url('/assets/plugins/isotope/isotope.pkgd.min.js', __FILE__), array('jquery'), BMP_GALLERY_VERSION, true);
+    wp_enqueue_script('imagesloaded', plugins_url('/assets/plugins/imagesloaded/imagesloaded.pkgd.min.js', __FILE__), array('jquery'), GO_GALLERY_VERSION, true);
+    wp_enqueue_script('isotope', plugins_url('/assets/plugins/isotope/isotope.pkgd.min.js', __FILE__), array('jquery'), GO_GALLERY_VERSION, true);
 
-    wp_enqueue_script('bmp-gallery', plugins_url('/assets/js/gallery.js', __FILE__), array('jquery', 'isotope', 'imagesloaded'), BMP_GALLERY_VERSION, true);
-    wp_enqueue_style('bmp-gallery', plugins_url('/assets/css/gallery.css', __FILE__), null, BMP_GALLERY_VERSION);
+    wp_enqueue_script('go-gallery', plugins_url('/assets/js/gallery.js', __FILE__), array('jquery', 'isotope', 'imagesloaded'), GO_GALLERY_VERSION, true);
+    wp_enqueue_style('go-gallery', plugins_url('/assets/css/gallery.css', __FILE__), null, GO_GALLERY_VERSION);
 
-    wp_enqueue_script('tos', plugins_url('/assets/plugins/tos/js/jquery.tosrus.min.all.js', __FILE__), array('jquery'), BMP_GALLERY_VERSION, true);
-    wp_enqueue_style('tos', plugins_url('/assets/plugins/tos/css/jquery.tosrus.all.css', __FILE__), null, BMP_GALLERY_VERSION);
+    wp_enqueue_script('hammer', plugins_url('/assets/plugins/tos/hammer.min.js', __FILE__), null, GO_GALLERY_VERSION, true);
+    wp_enqueue_script('tos', plugins_url('/assets/plugins/tos/js/jquery.tosrus.min.all.js', __FILE__), array('jquery'), GO_GALLERY_VERSION, true);
+    wp_enqueue_style('tos', plugins_url('/assets/plugins/tos/css/jquery.tosrus.all.css', __FILE__), null, GO_GALLERY_VERSION);
 
 }
 
@@ -39,20 +40,20 @@ function bmp_gallery_enqueue_scripts() {
  * @since   1.0.0
  * @return  void
  */
-function setup_taxonomies() {
+function go_setup_taxonomies() {
 
     $labels = array(
-        'name'              => _x('Media Categories', 'taxonomy general name', 'bmp_gallery'),
-        'singular_name'     => _x('Media Category', 'taxonomy singular name', 'bmp_gallery'),
-        'search_items'      => __('Search Media Categories', 'bmp_gallery'),
-        'all_items'         => __('All Media Categories', 'bmp_gallery'),
-        'parent_item'       => __('Parent Media Category', 'bmp_gallery'),
-        'parent_item_colon' => __('Parent Media Category:', 'bmp_gallery'),
-        'edit_item'         => __('Edit Media Category', 'bmp_gallery'),
-        'update_item'       => __('Update Media Category', 'bmp_gallery'),
-        'add_new_item'      => __('Add New Media Category', 'bmp_gallery'),
-        'new_item_name'     => __('New Media Category Name', 'bmp_gallery'),
-        'menu_name'         => __('Media Categories', 'bmp_gallery'),
+        'name'              => _x('Media Categories', 'taxonomy general name', 'go_gallery'),
+        'singular_name'     => _x('Media Category', 'taxonomy singular name', 'go_gallery'),
+        'search_items'      => __('Search Media Categories', 'go_gallery'),
+        'all_items'         => __('All Media Categories', 'go_gallery'),
+        'parent_item'       => __('Parent Media Category', 'go_gallery'),
+        'parent_item_colon' => __('Parent Media Category:', 'go_gallery'),
+        'edit_item'         => __('Edit Media Category', 'go_gallery'),
+        'update_item'       => __('Update Media Category', 'go_gallery'),
+        'add_new_item'      => __('Add New Media Category', 'go_gallery'),
+        'new_item_name'     => __('New Media Category Name', 'go_gallery'),
+        'menu_name'         => __('Media Categories', 'go_gallery'),
     );
 
     $args = array(
@@ -68,31 +69,31 @@ function setup_taxonomies() {
 
 }
 
-add_action('init', 'setup_taxonomies');
+add_action('init', 'go_setup_taxonomies');
 
 
 
  /** Add a category filter to images */
-function ct_add_image_category_filter() {
+function go_add_image_category_filter() {
     $screen = get_current_screen();
     if ( 'upload' == $screen->id ) {
         $dropdown_options = array( 'show_option_all' => __( 'View all categories', 'ct' ), 'hide_empty' => false, 'hierarchical' => true, 'orderby' => 'name', );
         wp_dropdown_categories( $dropdown_options );
     }
 }
-add_action( 'restrict_manage_posts', 'ct_add_image_category_filter' );
+add_action( 'restrict_manage_posts', 'go_add_image_category_filter' );
 
 
 
-add_shortcode('bmp_gallery', 'bmp_gallery_shortcode');
+add_shortcode('go_gallery', 'go_gallery_shortcode');
 
 
-function bmp_gallery_bool($value){
+function go_gallery_bool($value){
     return ($value == 'yes' || $value == 'on' || $value == '1');
 }
 
 
-function bmp_gallery_hex2rgb($hex, $alpha = '0.4') {
+function go_gallery_hex2rgb($hex, $alpha = '0.4') {
     $hex = str_replace("#", "", $hex);
 
     if(strlen($hex) == 3) {
@@ -109,7 +110,7 @@ function bmp_gallery_hex2rgb($hex, $alpha = '0.4') {
 }
 
 
-function bmp_gallery_shortcode($atts, $content = null) {
+function go_gallery_shortcode($atts, $content = null) {
 
     $atts = shortcode_atts(array(
         'cat'           => '',
@@ -129,7 +130,7 @@ function bmp_gallery_shortcode($atts, $content = null) {
         'gap'           => 10,
         'style'         => 'normal',
         'size'          => 'medium'
-    ), $atts, 'bmp_gallery');
+    ), $atts, 'go_gallery');
 
     $output = '';
 
@@ -164,25 +165,25 @@ function bmp_gallery_shortcode($atts, $content = null) {
 
     $atts['menu_gap'] = min($atts['menu_gap'], 100);
 
-    $classes[] = 'bmp-gallery';
+    $classes[] = 'go-gallery';
     $classes[] = 'menu-' . $atts['menu_pos'];
-    $classes[] = bmp_gallery_bool($atts['menu_show']) ? 'menu-show' : '';
+    $classes[] = go_gallery_bool($atts['menu_show']) ? 'menu-show' : '';
     $classes[] = 'size-' . $atts['size'];
     $classes[] = 'style-' . $atts['style'];
 
     $attributes = array();
     $attributes['class'] = join(' ', $classes);
-    $attributes['id'] = 'bmp-' . substr(md5(mt_rand(0, PHP_INT_MAX)), 0, 6);
+    $attributes['id'] = 'go-' . substr(md5(mt_rand(0, PHP_INT_MAX)), 0, 6);
     $attributes['data-gap'] = intval($atts['gap']);
     $attributes['data-border-color'] = $atts['border_color'];
-    $attributes['data-lightbox'] = bmp_gallery_bool($atts['lightbox']) ? 'yes' : 'no';
+    $attributes['data-lightbox'] = go_gallery_bool($atts['lightbox']) ? 'yes' : 'no';
     $attributes['data-desc-color'] = $atts['desc_color'];
     $attributes['data-menu-color'] = $atts['menu_color'];
     $attributes['data-menu-bg'] = $atts['menu_bg'];
     $attributes['data-menu-gap'] = $atts['menu_gap'];
     $attributes['data-bg'] = $atts['bg'];
     $attributes['data-border-size'] = $atts['border_size'];
-    $attributes['data-overlay-color'] = bmp_gallery_hex2rgb($atts['overlay_color']);
+    $attributes['data-overlay-color'] = go_gallery_hex2rgb($atts['overlay_color']);
 
     $thumb_size = 'medium';
 
@@ -198,9 +199,9 @@ function bmp_gallery_shortcode($atts, $content = null) {
     $query = new WP_Query($args);
 
     $output .= '<div ' . join(' ', $attributes) . '>';
-    $output .= '<ul class="bmp-gallery-filters">';
+    $output .= '<ul class="go-gallery-filters">';
     $output .= '<li>';
-    $output .= '<a data-filter="" href="#">' . __('All', 'bmp_gallery') . '</a>';
+    $output .= '<a data-filter="" href="#">' . __('All', 'go_gallery') . '</a>';
     $output .= '</li>';
 
     foreach($categories as $category){
@@ -215,15 +216,15 @@ function bmp_gallery_shortcode($atts, $content = null) {
 
     $output .= '</ul>';
 
-    $output .= '<div class="bmp-gallery-list-wrapper">';
-    $output .= '<ul class="bmp-gallery-list">';
+    $output .= '<div class="go-gallery-list-wrapper">';
+    $output .= '<ul class="go-gallery-list">';
 
     foreach($query->posts as $post){
 
         $category_terms = wp_get_post_terms($post->ID, 'attachment_category');
 
         $classes = array();
-        $classes[] = 'bmp-gallery-item';
+        $classes[] = 'go-gallery-item';
 
         foreach($category_terms as $category_term){
             $classes[] = 'category-' . $category_term->slug;
@@ -239,8 +240,8 @@ function bmp_gallery_shortcode($atts, $content = null) {
         $output .= wp_get_attachment_image($post->ID, $thumb_size);
 
         $output .= '<div class="image-overlay">';
-        
-        if(bmp_gallery_bool($atts['hover_data'])){
+
+        if(go_gallery_bool($atts['hover_data'])){
             $output .= '<h3>' . $post->post_title . '</h3>';
             $output .= '<h4>' . $post->post_content . '</h4>';
         }

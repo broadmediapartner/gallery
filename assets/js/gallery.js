@@ -4,7 +4,7 @@
 
         init: function(){
 
-            $('.bmp-gallery').each(function(){
+            $('.go-gallery').each(function(){
                 new Gallery.Instance(this);
             });
 
@@ -16,7 +16,7 @@
 
             this.container = $(element);
             this.id = this.container.attr('id');
-            this.list = this.container.find('ul.bmp-gallery-list');
+            this.list = this.container.find('ul.go-gallery-list');
             this.gap = this.container.data('gap');
             this.borderSize = this.container.data('border-size');
             this.lightbox = this.container.data('lightbox');
@@ -27,12 +27,12 @@
             this.bg = this.container.data('bg');
             this.overlayColor = this.container.data('overlay-color');
             this.descColor = this.container.data('desc-color');
-            this.filters = this.container.find('ul.bmp-gallery-filters');
+            this.filters = this.container.find('ul.go-gallery-filters');
             this.items = $('li', this.container);
             this.win = $(window);
-            this.overlay = $('<div>').attr('id', 'bmp-overlay');
+            this.overlay = $('<div>').attr('id', 'go-overlay');
 
-            this.overlayBg = $('<div>').attr('id', 'bmp-overlay-bg');
+            this.overlayBg = $('<div>').attr('id', 'go-overlay-bg');
 
 
             this.overlay.append(this.overlayBg);
@@ -46,7 +46,7 @@
 
 
                 this.list.isotope({
-                    itemSelector: '.bmp-gallery-item',
+                    itemSelector: '.go-gallery-item',
                     layoutMode: 'masonry'
                 });
 
@@ -166,23 +166,23 @@
                 var prefix = '#' + this.id;
 
                 style.html([
-                    prefix + ' ul.bmp-gallery-list li.bmp-gallery-item {',
+                    prefix + ' ul.go-gallery-list li.go-gallery-item {',
                     'padding: ' + (this.gap / 2) + 'px;',
                     '}',
-                    prefix + ' ul.bmp-gallery-list li.bmp-gallery-item .image-wrap {',
+                    prefix + ' ul.go-gallery-list li.go-gallery-item .image-wrap {',
                     'padding: ' + this.borderSize + 'px;',
                     'background: ' + this.borderColor + ';',
                     '}',
-                    prefix + ' ul.bmp-gallery-list li.bmp-gallery-item .image-overlay {',
+                    prefix + ' ul.go-gallery-list li.go-gallery-item .image-overlay {',
                     'background: ' + this.overlayColor + ';',
                     '}',
-                    prefix + ' ul.bmp-gallery-list li.bmp-gallery-item .image-overlay h4 {',
+                    prefix + ' ul.go-gallery-list li.go-gallery-item .image-overlay h4 {',
                     'color: ' + this.descColor + ';',
                     '}',
                     prefix + ' {',
                     'background-color: ' + this.bg + ';',
                     '}',
-                    prefix + ' ul.bmp-gallery-filters li a {',
+                    prefix + ' ul.go-gallery-filters li a {',
                     'background-color: ' + this.menuBg + ';',
                     'color: ' + this.menuColor + ';',
                     'margin: 0 ' + (this.menuGap / 2) + 'px;',
